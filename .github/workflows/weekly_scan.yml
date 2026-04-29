@@ -11,20 +11,12 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Show repo structure
-        run: find . -not -path './.git/*' | sort
-
       - name: Install dependencies
         run: |
-          REQ=$(find . -name "requirements.txt" | grep -v ".git" | head -1)
-          echo "Found requirements.txt at: $REQ"
-          pip install -r "$REQ"
-
+          find . -name "requirements.txt" | grep -v ".git" | head -1 | xargs pip install -r
       - name: Run EIQUS Tender Monitor
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -34,6 +26,9 @@ jobs:
           RECIPIENT_EMAIL: thomas.garcia@eiqus.com
           SENDER_EMAIL: thomas.garcia@eiqus.com
         run: |
-          MONITOR=$(find . -name "eiqus_monitor.py" | grep -v ".git" | head -1)
-          echo "Found eiqus_monitor.py at: $MONITOR"
-          python "$MONITOR"
+          MAIN=$(find . -name "main.py" | grep -v ".git" | head -1)
+          DIR=$(dirname "$MAIN")
+          echo "Running $MAIN from $DIR"
+          cd "$DIR"
+          export PYTHONPATH="$DIR"
+          python main.py
