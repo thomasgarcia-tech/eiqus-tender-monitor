@@ -11,11 +11,20 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Show repo structure
+        run: find . -not -path './.git/*' | sort
+
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          REQ=$(find . -name "requirements.txt" | grep -v ".git" | head -1)
+          echo "Found requirements.txt at: $REQ"
+          pip install -r "$REQ"
+
       - name: Run EIQUS Tender Monitor
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -24,4 +33,7 @@ jobs:
           GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
           RECIPIENT_EMAIL: thomas.garcia@eiqus.com
           SENDER_EMAIL: thomas.garcia@eiqus.com
-        run: python eiqus_monitor.py
+        run: |
+          MONITOR=$(find . -name "eiqus_monitor.py" | grep -v ".git" | head -1)
+          echo "Found eiqus_monitor.py at: $MONITOR"
+          python "$MONITOR"
