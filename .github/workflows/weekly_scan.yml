@@ -11,15 +11,12 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
       - name: Install dependencies
         run: pip install -r requirements.txt
-
-      - name: Find and run EIQUS Tender Monitor
+      - name: Run EIQUS Tender Monitor
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
@@ -27,17 +24,4 @@ jobs:
           GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
           RECIPIENT_EMAIL: thomas.garcia@eiqus.com
           SENDER_EMAIL: thomas.garcia@eiqus.com
-        run: |
-          echo "=== Searching for main.py ==="
-          find . -name "main.py" | grep -v ".git"
-          MAIN=$(find . -name "main.py" | grep -v ".git" | python3 -c "
-          import sys
-          paths = [p.strip() for p in sys.stdin.read().strip().split('\n') if p.strip()]
-          deepest = sorted(paths, key=lambda x: x.count('/'), reverse=True)[0]
-          print(deepest)
-          ")
-          echo "=== Running: $MAIN ==="
-          DIR=$(dirname "$MAIN")
-          cd "$DIR"
-          export PYTHONPATH="$DIR"
-          python main.py
+        run: python eiqus_monitor.py
