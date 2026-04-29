@@ -19,6 +19,9 @@ jobs:
       - name: Install dependencies
         run: pip install anthropic google-auth google-auth-oauthlib google-api-python-client
 
+      - name: Debug - list all files
+        run: find . -not -path './.git/*' | sort
+
       - name: Run EIQUS Tender Monitor
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -27,4 +30,7 @@ jobs:
           GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
           RECIPIENT_EMAIL: thomas.garcia@eiqus.com
           SENDER_EMAIL: thomas.garcia@eiqus.com
-        run: python $(find . -name "eiqus_monitor.py" | grep -v ".git" | head -1)
+        run: |
+          MAIN=$(find . -name "eiqus_monitor.py" | grep -v ".git" | sort | head -1)
+          echo "Using: $MAIN"
+          python "$MAIN"
