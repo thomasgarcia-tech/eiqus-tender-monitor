@@ -11,12 +11,14 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - name: Install dependencies
-        run: |
-          find . -name "requirements.txt" | grep -v ".git" | head -1 | xargs pip install -r
+        run: pip install anthropic google-auth google-auth-oauthlib google-api-python-client
+
       - name: Run EIQUS Tender Monitor
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -25,10 +27,4 @@ jobs:
           GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
           RECIPIENT_EMAIL: thomas.garcia@eiqus.com
           SENDER_EMAIL: thomas.garcia@eiqus.com
-        run: |
-          MAIN=$(find . -name "main.py" | grep -v ".git" | head -1)
-          DIR=$(dirname "$MAIN")
-          echo "Running $MAIN from $DIR"
-          cd "$DIR"
-          export PYTHONPATH="$DIR"
-          python main.py
+        run: python $(find . -name "eiqus_monitor.py" | grep -v ".git" | head -1)
